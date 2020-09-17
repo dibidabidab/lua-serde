@@ -1,0 +1,8 @@
+A:
+  - b: B
+  - i: int
+  - s: string
+  - f: float
+
+B:
+  - i: int
