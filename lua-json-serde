@@ -8,7 +8,7 @@ from template import renderStructs
 
 if len(sys.argv) != 3:
     print("Usage: ")
-    print("lua-cpp-serde <configs> <outputdir>")
+    print("lua-json-serde <configs> <outputdir>")
     exit(0)
 
 configGlob = sys.argv[1]
