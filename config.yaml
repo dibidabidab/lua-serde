@@ -1,6 +1,5 @@
 config:
   namespace: dibidabidab
-  pragma_once: STRUCT_A_AND_B
 
 A:
   b: B

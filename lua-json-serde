@@ -23,8 +23,7 @@ generatedFiles = []
 for ast in astList:
     render = renderStructs(ast)
 
-    basename, ext = os.path.splitext(ast['filename'])
-    filename = basename + '.hpp'
+    filename = ast['filename'] + '.hpp'
     generatedFiles.append(filename)
 
     file = open(os.path.join(outputDir, filename), 'w')

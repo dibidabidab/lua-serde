@@ -11,7 +11,8 @@ def readGlobAST(configGlob):
 def readAST(path):
     file = open(path)
     structs = yaml.load(file, Loader=yaml.FullLoader)
-    return prepareAST(structs, os.path.basename(path))
+    basepath, _ = os.path.splitext(path)
+    return prepareAST(structs, basepath)
 
 
 def popOr(dict, key, default):
@@ -20,15 +21,16 @@ def popOr(dict, key, default):
     return default
 
 
-def prepareAST(structs, filename):
+def prepareAST(structs, basepath):
     config = popOr(structs, 'config', {})
     for key in structs:
         structs[key] = prepareStruct(structs[key])
+    config['pragma_once'] = basepath.replace('.', '_').replace('/', '_')
 
     return {
         'config': config,
         'structs': structs,
-        'filename': filename,
+        'filename': os.path.basename(basepath),
     }
 
 
