@@ -13,5 +13,8 @@ A:
   _methods:
     - int simpleFunction();
 
+  _hash:
+    [b, i]
+
 B:
   i: int

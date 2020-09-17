@@ -31,10 +31,18 @@
     constexpr static const char *COMPONENT_NAME = "{{ structName }}";
     inline static const int COMPONENT_TYPE_HASH = hashStringCrossPlatform("{{ structName }}";
     inline static const ComponentUtils *Utils = ComponentUtils::create<{{ structName }}>();
+{% endmacro %}
 
+{% macro hash(hashFields) %}
     size_t getHash() {
-        size_t hash = 0;
-        hash ^= hashValue(0) + 0x9e3779b9 + (hash << 6u) + (hash >> 2u);
-        return hash;
+        {% if hashFields is defined %}
+            size_t hash = 0;
+            {% for hashField in hashFields %}
+                hash ^= hashValue({{ hashField }}) + 0x9e3779b9 + (hash << 6u) + (hash >> 2u);
+            {% endfor %}
+            return hash;
+        {% else %}
+            return 0;
+        {% endif %}
     }
 {% endmacro %}

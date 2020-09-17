@@ -21,6 +21,9 @@
         // Struct info (for in-game inspector)
         {{ prop.structInfo(structName, struct.expose) }}
 
+        // Hash function
+        {{ prop.hash(struct.hash) }}
+
         // JSON serde functions
         {{ jserde.generate(structName, struct.expose) }}
     }
