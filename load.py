@@ -5,8 +5,7 @@ from glob import glob
 import yaml
 
 
-def readGlobAST(configGlob):
-    paths = glob(configGlob)
+def readMultiAST(paths):
     return [readAST(path) for path in paths]
 
 
