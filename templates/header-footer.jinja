@@ -1,0 +1,24 @@
+{% macro pragma_once(name) %}
+    {% if name is defined %}
+        #ifndef {{ name }}
+        #define {{ name }}
+    {% endif %}
+{% endmacro %}
+
+{% macro pragma_once_end(name) %}
+    {% if name is defined %}
+        #endif
+    {% endif %}
+{% endmacro %}
+
+{% macro namespace(name) %}
+    {% if name is defined %}
+        namespace {{ name }} {
+    {% endif %}
+{% endmacro %}
+
+{% macro namespace_end(name) %}
+    {% if name is defined %}
+        }
+    {% endif %}
+{% endmacro %}

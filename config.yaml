@@ -1,8 +1,18 @@
+config:
+  namespace: dibidabidab
+  pragma_once: STRUCT_A_AND_B
+
 A:
-  - b: B
-  - i: int
-  - s: string
-  - f: float
+  b: B
+  i: [int, 0]
+  s: string
+  f: float
+
+  _cpp_only:
+    notForLua: [int, 0]
+
+  _methods:
+    - int simpleFunction();
 
 B:
-  - i: int
+  i: int
