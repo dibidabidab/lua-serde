@@ -12,6 +12,5 @@ template = env.get_template('struct.jinja')
 
 
 def renderStructs(ast):
-    print(ast)
     return template.render(structs=ast['structs'], config=ast['config'])
 
