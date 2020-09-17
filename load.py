@@ -24,6 +24,7 @@ def popOr(dict, key, default):
 
 
 def prepareAST(structs, basepath):
+    print(structs)
     config = popOr(structs, 'config', {})
     for key in structs:
         structs[key] = prepareStruct(structs[key])
@@ -57,7 +58,7 @@ def prepareVars(dict):
             prepared.append({
                 'name': key,
                 'typ': typ,
-                'default': default,
+                'default': removeAutoParse(default),
             })
         else:
             prepared.append({
@@ -65,3 +66,13 @@ def prepareVars(dict):
                 'typ': value,
             })
     return prepared
+
+
+def removeAutoParse(str):
+    if str is False:
+        return 'false'
+    if str is True:
+        return 'true'
+    if str is None:
+        return 'NULL'
+    return str

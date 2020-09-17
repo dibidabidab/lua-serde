@@ -6,7 +6,7 @@ from sys import argv
 from load import readMultiAST
 from template import renderStructs
 
-if len(argv) != 3:
+if len(argv) < 3:
     print("Usage: ")
     print("lua-json-serde <outputdir> <config1> <config2> ...")
     exit(0)

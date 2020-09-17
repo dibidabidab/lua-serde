@@ -2,10 +2,11 @@ config:
   namespace: dibidabidab
 
 A:
-  b: B
+  b: [B, NULL]
   i: [int, 0]
   s: string
   f: float
+  bol: [bool, false]
 
   _cpp_only:
     notForLua: [int, 0]
