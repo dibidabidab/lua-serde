@@ -24,7 +24,6 @@ def popOr(dict, key, default):
 
 
 def prepareAST(structs, basepath):
-    print(structs)
     config = popOr(structs, 'config', {})
     for key in structs:
         structs[key] = prepareStruct(structs[key])
@@ -38,9 +37,17 @@ def prepareAST(structs, basepath):
 
 
 def prepareStruct(struct):
+    if struct is None:
+        return {
+            'expose': {},
+            'cpp_only': {},
+            'methods': [],
+            'hash': None,
+        }
+
     cpp_only = popOr(struct, '_cpp_only', {})
     methods = popOr(struct, '_methods', [])
-    hash = popOr(struct, '_hash', [])
+    hash = popOr(struct, '_hash', None)
 
     return {
         'expose': prepareVars(struct),
