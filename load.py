@@ -37,7 +37,7 @@ def prepareAST(structs, basepath):
 
 
 def prepareStruct(struct):
-    if struct is None:
+    if struct is None or type(struct) is str:
         return {
             'expose': {},
             'cpp_only': {},
