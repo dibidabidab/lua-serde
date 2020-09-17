@@ -10,6 +10,7 @@ def readMultiAST(paths):
 
 
 def readAST(configPath):
+    print("File: " + configPath)
     file = open(configPath)
     structs = yaml.load(file, Loader=yaml.FullLoader)
     basepath, _ = path.splitext(configPath)
@@ -26,6 +27,7 @@ def popOr(dict, key, default):
 def prepareAST(structs, basepath):
     config = popOr(structs, 'config', {})
     for key in structs:
+        print("      " + key)
         structs[key] = prepareStruct(structs[key])
     config['pragma_once'] = basepath.replace('.', '_').replace('/', '_')
 
