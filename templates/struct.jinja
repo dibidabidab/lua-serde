@@ -1,5 +1,6 @@
 {% import 'header-footer.jinja' as hd %}
 {% import 'properties.jinja' as prop %}
+{% import 'serde-json.jinja' as jserde %}
 
 {{ hd.pragma_once(config.pragma_once) }}
 {{ hd.namespace(config.namespace) }}
@@ -18,14 +19,10 @@
         {{ prop.methods(struct.methods) }}
 
         // Struct info (for in-game inspector)
-        inline static const SerializableStructInfo STRUCT_INFO = SerializableStructInfo(
-            "{{ structName }}",
-            { {{ prop.names(struct.expose, '"', '", ') }} },
-            { {{ prop.types(struct.expose, '"', '", ') }} },
-            { {{ prop.types(struct.expose, 'isFieldTypePrimitive<', '>(), ') }} },
-            { {{ prop.types(struct.expose, 'isStructFieldFixedSize<', '>(), ') }} },
-            SerializableStructInfo::getTypeHash<{{ structName }}>()
-        );
+        {{ prop.structInfo(structName, struct.expose) }}
+
+        // JSON serde functions
+        {{ jserde.generate(structName, struct.expose) }}
     }
 {% endfor %}
 

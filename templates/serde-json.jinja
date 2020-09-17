@@ -1,0 +1,52 @@
+{% macro generate(structName, struct) %}
+    {{ toJson(struct) }}
+    {{ toJsonArray(struct) }}
+    {{ fromJson(struct) }}
+    {{ fromJsonArray(struct) }}
+    {{ copyFieldsFrom(structName, struct) }}
+{% endmacro %}
+
+{% macro toJson(struct) %}
+    void toJson(json &j) const {
+        j = json{
+            {% for field in struct %}
+                { "{{ field.name }}", {{ field.name }} },
+            {% endfor %}
+        };
+    }
+{% endmacro %}
+
+{% macro toJsonArray(struct) %}
+    void toJsonArray(json &j) const {
+        j = json::array({
+            {% for field in struct %}
+                {{ field.name }},
+            {% endfor %}
+        });
+    }
+{% endmacro %}
+
+{% macro fromJson(struct) %}
+    void fromJson(const json &j) {
+        {% for field in struct %}
+            if (j.contains("{{ field.name }}"))
+                getTo({{ field.name }}, j.at("{{ field.name }}"));
+        {% endfor %}
+    }
+{% endmacro %}
+
+{% macro fromJsonArray(struct) %}
+    void fromJsonArray(const json &j) {
+        {% for field in struct %}
+            getTo({{ field.name }}, j.at({{ loop.index0 }});
+        {% endfor %}
+    }
+{% endmacro %}
+
+{% macro copyFieldsFrom(structName, struct) %}
+    void copyFieldsFrom(const {{ structName }} &other) {
+        {% for field in struct %}
+            {{ field.name }} = other.{{ field.name }};
+        {% endfor %}
+    }
+{% endmacro %}

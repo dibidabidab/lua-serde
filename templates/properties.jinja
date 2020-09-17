@@ -11,9 +11,30 @@
 {% endmacro %}
 
 {% macro names(struct, before, after) %}
-{% for var in struct %}{{ before }}{{ var.name }}{{ after }}{% endfor %}
+    {% for var in struct %}{{ before }}{{ var.name }}{{ after }}{% endfor %}
 {% endmacro %}
 
 {% macro types(struct, before, after) %}
     {% for var in struct %}{{ before }}{{ var.typ }}{{ after }}{% endfor %}
+{% endmacro %}
+
+{% macro structInfo(structName, struct) %}
+    inline static const SerializableStructInfo STRUCT_INFO = SerializableStructInfo(
+        "{{ structName }}",
+        { {{ names(struct, '"', '", ') }} },
+        { {{ types(struct, '"', '", ') }} },
+        { {{ types(struct, 'isFieldTypePrimitive<', '>(), ') }} },
+        { {{ types(struct, 'isStructFieldFixedSize<', '>(), ') }} },
+        SerializableStructInfo::getTypeHash<{{ structName }}>()
+    );
+
+    constexpr static const char *COMPONENT_NAME = "{{ structName }}";
+    inline static const int COMPONENT_TYPE_HASH = hashStringCrossPlatform("{{ structName }}";
+    inline static const ComponentUtils *Utils = ComponentUtils::create<{{ structName }}>();
+
+    size_t getHash() {
+        size_t hash = 0;
+        hash ^= hashValue(0) + 0x9e3779b9 + (hash << 6u) + (hash >> 2u);
+        return hash;
+    }
 {% endmacro %}
