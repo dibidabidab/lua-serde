@@ -1,121 +1,39 @@
 #! /bin/python
 
-import glob
-import os
-import sys
-import yaml
+from os import path, makedirs
+from sys import argv
 
-from jinja2 import Environment, FileSystemLoader
+from load import readGlobAST
+from template import renderStructs
 
+if len(argv) != 3:
+    print("Usage: ")
+    print("lua-json-serde <configs> <outputdir>")
+    exit(0)
 
-def main():
-    if len(sys.argv) != 3:
-        print("Usage: ")
-        print("lua-json-serde <configs> <outputdir>")
-        exit(0)
+configGlob = argv[1]
+outputDir = argv[2]
 
-    configGlob = sys.argv[1]
-    outputDir = sys.argv[2]
+if not path.exists(outputDir):
+    makedirs(outputDir)
 
-    if not os.path.exists(outputDir):
-        os.makedirs(outputDir)
+astList = readGlobAST(configGlob)
+generatedFiles = []
 
-    astList = readGlobAST(configGlob)
-    generatedFiles = []
+for ast in astList:
+    render = renderStructs(ast)
 
-    for ast in astList:
-        render = renderStructs(ast)
+    filename = ast['filename'] + '.hpp'
+    generatedFiles.append(filename)
 
-        filename = ast['filename'] + '.hpp'
-        generatedFiles.append(filename)
-
-        file = open(os.path.join(outputDir, filename), 'w')
-        file.write(render)
-        file.close()
-
-    file = open(os.path.join(outputDir, 'include_all.hpp'), 'w')
-    file.writelines(['#include "' + filename + '"' for filename in generatedFiles])
+    file = open(path.join(outputDir, filename), 'w')
+    file.write(render)
     file.close()
 
-
-# Files
-def readGlobAST(configGlob):
-    paths = glob.glob(configGlob)
-    return [readAST(path) for path in paths]
+file = open(path.join(outputDir, 'include_all.hpp'), 'w')
+file.writelines(['#include "' + filename + '"' for filename in generatedFiles])
+file.close()
 
 
-def readAST(path):
-    file = open(path)
-    structs = yaml.load(file, Loader=yaml.FullLoader)
-    basepath, _ = os.path.splitext(path)
-    return prepareAST(structs, basepath)
 
 
-# Prepare for generation
-def popOr(dict, key, default):
-    if key in dict:
-        return dict.pop(key)
-    return default
-
-
-def prepareAST(structs, basepath):
-    config = popOr(structs, 'config', {})
-    for key in structs:
-        structs[key] = prepareStruct(structs[key])
-    config['pragma_once'] = basepath.replace('.', '_').replace('/', '_')
-
-    return {
-        'config': config,
-        'structs': structs,
-        'filename': os.path.basename(basepath),
-    }
-
-
-def prepareStruct(struct):
-    cpp_only = popOr(struct, '_cpp_only', {})
-    methods = popOr(struct, '_methods', [])
-    hash = popOr(struct, '_hash', [])
-
-    return {
-        'expose': prepareVars(struct),
-        'cpp_only': prepareVars(cpp_only),
-        'methods': methods,
-        'hash': hash
-    }
-
-
-def prepareVars(dict):
-    prepared = []
-    for key, value in dict.items():
-        if type(value) is list:
-            typ, default = value
-            prepared.append({
-                'name': key,
-                'typ': typ,
-                'default': default,
-            })
-        else:
-            prepared.append({
-                'name': key,
-                'typ': value,
-            })
-    return prepared
-
-
-# Rendering
-env = Environment(
-    loader=FileSystemLoader('templates'),
-    autoescape=False,
-    trim_blocks=True,
-    lstrip_blocks=True,
-)
-
-template = env.get_template('struct.jinja')
-
-
-def renderStructs(ast):
-    print(ast)
-    return template.render(structs=ast['structs'], config=ast['config'])
-
-
-main()
