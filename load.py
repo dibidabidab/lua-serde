@@ -41,6 +41,7 @@ def prepareAST(structs, basepath, includeHeader):
 def prepareStruct(struct):
     if struct is None or type(struct) is str:
         return {
+            'flags': flagDict([]),
             'expose': {},
             'cpp_only': {},
             'methods': [],
