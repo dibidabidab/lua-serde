@@ -2,22 +2,24 @@
 
 from os import path, makedirs
 from sys import argv
+from glob import glob
 
 from load import readMultiAST
 from template import renderStructs
 
-if len(argv) < 3:
+if len(argv) < 4:
     print("Usage: ")
-    print("lua-json-serde <outputdir> <config1> <config2> ...")
+    print("lua-json-serde <outputdir> <includeheader> <inputdir>")
     exit(0)
 
 outputDir = argv[1]
-configs = argv[2:]
+includeHeader = argv[2]
+configs = glob(argv[3] + "/**/*.yaml", recursive=True)
 
 if not path.exists(outputDir):
     makedirs(outputDir)
 
-astList = readMultiAST(configs)
+astList = readMultiAST(configs, includeHeader)
 generatedFiles = []
 
 for ast in astList:

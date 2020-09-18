@@ -38,7 +38,7 @@
 {% macro fromJsonArray(struct) %}
     void fromJsonArray(const json &j) {
         {% for field in struct %}
-            getTo({{ field.name }}, j.at({{ loop.index0 }});
+            getTo({{ field.name }}, j.at({{ loop.index0 }}));
         {% endfor %}
     }
 {% endmacro %}
@@ -49,4 +49,17 @@
             {{ field.name }} = other.{{ field.name }};
         {% endfor %}
     }
+{% endmacro %}
+
+{% macro implicitConversionFunctions(structName) %}
+
+    static void to_json(json &j, const {{ structName }} &v)
+    {
+        v.toJsonArray(j);
+    }
+    static void from_json(const json &j, {{ structName }} &v)
+    {
+        v.fromJsonArray(j);
+    }
+
 {% endmacro %}
