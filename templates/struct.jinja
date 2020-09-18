@@ -3,10 +3,10 @@
 {% import 'serde-json.jinja' as jserde %}
 {% import 'serde-lua.jinja' as lserde %}
 
+#include "{{ config.include_header }}"
+
 {{ hd.pragma_once(config.pragma_once) }}
 {{ hd.namespace(config.namespace) }}
-
-#include "{{ config.include_header }}"
 
 {% for structName, struct in structs.items() %}
     struct {{ structName }} {

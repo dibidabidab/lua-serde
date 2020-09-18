@@ -12,13 +12,13 @@
 {% endmacro %}
 
 {% macro namespace(name) %}
-    {% if name != None %}
+    {% if name %}
         namespace {{ name }} {
     {% endif %}
 {% endmacro %}
 
 {% macro namespace_end(name) %}
-    {% if name != None %}
+    {% if name %}
         }
     {% endif %}
 {% endmacro %}
