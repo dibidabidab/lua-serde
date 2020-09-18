@@ -22,8 +22,13 @@
         // Struct info (for in-game inspector)
         {{ prop.structInfo(structName, struct.expose) }}
 
-        // Hash function
-        {{ prop.hash(struct.hash) }}
+        // Component info (for in-game inspector)
+        {% if not struct.flags.not_a_component %}
+            {{ prop.componentInfo(structName, struct.expose) }}
+
+            // Hash function
+            {{ prop.hash(struct.hash) }}
+        {% endif %}
 
         // Lua serde functions
         {{ lserde.toLuaTable(struct.expose) }}
@@ -34,7 +39,7 @@
     };
 
     // implicit conversion JSON functions
-    {{ jserde.implicitConversionFunctions(structName) }}
+    {{ jserde.implicitConversionFunctions(structName, struct.flags.json_with_keys) }}
 
 {% endfor %}
 
