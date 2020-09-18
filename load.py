@@ -1,6 +1,5 @@
 # Files
 from os import path
-from glob import glob
 
 import yaml
 
