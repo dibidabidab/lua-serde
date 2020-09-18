@@ -5,7 +5,7 @@
 {{ hd.pragma_once(config.pragma_once) }}
 {{ hd.namespace(config.namespace) }}
 
-#include "macro_magic/component.h"
+#include "{{ config.include_header }}"
 
 {% for structName, struct in structs.items() %}
     struct {{ structName }} {
@@ -26,7 +26,11 @@
 
         // JSON serde functions
         {{ jserde.generate(structName, struct.expose) }}
-    }
+    };
+
+    // implicit conversion JSON functions
+    {{ jserde.implicitConversionFunctions(structName) }}
+
 {% endfor %}
 
 {{ hd.namespace_end(config.namespace) }}

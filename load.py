@@ -5,16 +5,16 @@ from glob import glob
 import yaml
 
 
-def readMultiAST(paths):
-    return [readAST(path) for path in paths]
+def readMultiAST(paths, includeHeader):
+    return [readAST(path, includeHeader) for path in paths]
 
 
-def readAST(configPath):
+def readAST(configPath, includeHeader):
     print("File: " + configPath)
     file = open(configPath)
     structs = yaml.load(file, Loader=yaml.FullLoader)
     basepath, _ = path.splitext(configPath)
-    return prepareAST(structs, basepath)
+    return prepareAST(structs, basepath, includeHeader)
 
 
 # Prepare for generation
@@ -24,12 +24,13 @@ def popOr(dict, key, default):
     return default
 
 
-def prepareAST(structs, basepath):
+def prepareAST(structs, basepath, includeHeader):
     config = popOr(structs, 'config', {})
     for key in structs:
         print("      " + key)
         structs[key] = prepareStruct(structs[key])
     config['pragma_once'] = basepath.replace('.', '_').replace('/', '_')
+    config['include_header'] = includeHeader
 
     return {
         'config': config,
