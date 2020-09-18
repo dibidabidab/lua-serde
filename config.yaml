@@ -4,9 +4,10 @@ config:
 A:
   b: [B, NULL]
   i: [int, 0]
-  s: string
+  s: [string, Hello world!]
   f: float
   bol: [bool, false]
+
 
   _cpp_only:
     notForLua: [int, 0]

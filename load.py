@@ -1,6 +1,5 @@
 # Files
 from os import path
-from glob import glob
 
 import yaml
 
@@ -67,18 +66,20 @@ def prepareVars(dict):
             typ, default = value
             prepared.append({
                 'name': key,
-                'typ': typ,
-                'default': removeAutoParse(default),
+                'typ': fixTyp(typ),
+                'default': fixDefault(typ, default),
             })
         else:
             prepared.append({
                 'name': key,
-                'typ': value,
+                'typ': fixTyp(value),
             })
     return prepared
 
 
-def removeAutoParse(str):
+def fixDefault(typ, str):
+    if typ == "string":
+        return '"{}"'.format(str)
     if str is False:
         return 'false'
     if str is True:
@@ -86,3 +87,9 @@ def removeAutoParse(str):
     if str is None:
         return 'NULL'
     return str
+
+
+def fixTyp(typ):
+    if typ == "string":
+        return 'std::string'
+    return typ

@@ -1,6 +1,7 @@
 {% import 'header-footer.jinja' as hd %}
 {% import 'properties.jinja' as prop %}
 {% import 'serde-json.jinja' as jserde %}
+{% import 'serde-lua.jinja' as lserde %}
 
 {{ hd.pragma_once(config.pragma_once) }}
 {{ hd.namespace(config.namespace) }}
@@ -23,6 +24,9 @@
 
         // Hash function
         {{ prop.hash(struct.hash) }}
+
+        // Lua serde functions
+        {{ lserde.generate(struct.expose) }}
 
         // JSON serde functions
         {{ jserde.generate(structName, struct.expose) }}

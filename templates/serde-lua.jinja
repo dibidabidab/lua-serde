@@ -1,0 +1,23 @@
+{% macro generate(struct) %}
+    {{ fromLuaTable(struct) }}
+    {{ toLuaTable(struct) }}
+{% endmacro %}
+
+{% macro fromLuaTable(struct) %}
+    void fromLuaTable(const sol::table &table) {
+        {% for field in struct %}
+            lua_converter<{{ field.typ }}>::fromLua(table["{{ field.name }}"], {{ field.name }});
+        {% endfor %}
+    }
+{% endmacro %}
+
+{% macro toLuaTable(struct) %}
+    void toLuaTable(sol::table &table) const {
+        {% for field in struct %}
+            {
+                auto ref = table["{{ field.name }}"];
+                lua_converter<{{ field.typ }}>::toLua(ref, {{ field.name }});
+            };
+        {% endfor %}
+    }
+{% endmacro %}
