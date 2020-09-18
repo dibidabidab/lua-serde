@@ -3,6 +3,7 @@
 from os import path, makedirs
 from sys import argv
 from glob import glob
+from pathlib import Path
 
 from load import readMultiAST
 from template import renderStructs
@@ -28,13 +29,19 @@ for ast in astList:
     filename = ast['filename'] + '.hpp'
     generatedFiles.append(filename)
 
-    file = open(path.join(outputDir, filename), 'w')
+    outPath = path.join(outputDir, filename)
+
+    if Path(outPath).read_text() == render:
+        print(filename + " unchanged")
+        continue
+
+    file = open(outPath, 'w')
     file.write(render)
     file.close()
 
-file = open(path.join(outputDir, 'include_all.hpp'), 'w')
-file.writelines(['#include "' + filename + '"\n' for filename in generatedFiles])
-file.close()
+# file = open(path.join(outputDir, 'include_all.hpp'), 'w')
+# file.writelines(['#include "' + filename + '"\n' for filename in generatedFiles])
+# file.close()
 
 
 
