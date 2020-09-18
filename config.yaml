@@ -2,6 +2,9 @@ config:
   namespace: dibidabidab
 
 A:
+  _options:
+    - json_with_keys
+
   b: [B, NULL]
   i: [int, 0]
   s: [string, Hello world!]
