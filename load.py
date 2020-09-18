@@ -58,21 +58,29 @@ def prepareStruct(struct):
     }
 
 
+class Field:
+    def __init__(self, name, typ, default=None):
+        self.name = name
+        self.typ = typ
+        self.default = default
+
+    def __hash__(self):
+        return self.name.__hash__()
+
+    def __repr__(self):
+        return "Field {{name: '{}', typ: '{}', default: '{}'}}".format(self.name, self.typ, self.default)
+
+
 def prepareVars(dict):
     prepared = []
     for key, value in dict.items():
         if type(value) is list:
             typ, default = value
-            prepared.append({
-                'name': key,
-                'typ': fixTyp(typ),
-                'default': fixDefault(typ, default),
-            })
+            prepared.append(
+                Field(key, fixTyp(typ), fixDefault(typ, default)))
         else:
-            prepared.append({
-                'name': key,
-                'typ': fixTyp(value),
-            })
+            prepared.append(
+                Field(key, fixTyp(value)))
     return prepared
 
 
