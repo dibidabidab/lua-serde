@@ -19,7 +19,7 @@ def renderStructs(ast):
 
 def genStringTrees(ast):
     for struct in ast['structs'].values():
-        struct['split'] = stringTree(set(struct['expose']))
+        struct['split'] = stringTree(struct['expose'])
 
 
 class Bucket:
@@ -30,8 +30,8 @@ class Bucket:
 
     def insert(self, key, value):
         if key not in self.buckets:
-            self.buckets[key] = set()
-        self.buckets[key].add(value)
+            self.buckets[key] = []
+        self.buckets[key].append(value)
 
     def singleton(self):
         return len(self.buckets) < 2
@@ -40,15 +40,15 @@ class Bucket:
         return max([len(sbucket) for sbucket in self.buckets.values()])
 
 
-def stringTree(set, key=None):
-    if len(set) == 0:
+def stringTree(fields, key=None):
+    if len(fields) == 0:
         return {'mode': 'empty'}
-    if len(set) == 1:
-        return {'mode': 'singleton', 'key': key, 'value': list(set)[0]}
+    if len(fields) == 1:
+        return {'mode': 'singleton', 'key': key, 'value': fields[0]}
 
     splits = []
-    letterSplits(set, splits)
-    lengthSplits(set, splits)
+    letterSplits(fields, splits)
+    lengthSplits(fields, splits)
 
     minSplit = min(splits, key=lambda bucket: bucket.mbsize())
 
@@ -56,23 +56,23 @@ def stringTree(set, key=None):
         'mode': minSplit.mode,
         'index': minSplit.index,
         'key': key,
-        'buckets': [stringTree(set, key) for key, set in minSplit.buckets.items()],
+        'buckets': [stringTree(bucket, key) for key, bucket in minSplit.buckets.items()],
     }
 
 
-def letterSplits(set, splits):
-    length = min([len(value.name) for value in set])
+def letterSplits(fields, splits):
+    length = min([len(value.name) for value in fields])
     for i in range(length):
         bucket = Bucket('letter', i)
-        for field in set:
+        for field in fields:
             bucket.insert("'" + field.name[i] + "'", field)
         if not bucket.singleton():
             splits.append(bucket)
 
 
-def lengthSplits(set, splits):
+def lengthSplits(fields, splits):
     bucket = Bucket('length', 0)
-    for field in set:
+    for field in fields:
         bucket.insert(len(field.name), field)
     if not bucket.singleton():
         splits.append(bucket)
