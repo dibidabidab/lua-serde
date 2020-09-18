@@ -26,7 +26,8 @@
         {{ prop.hash(struct.hash) }}
 
         // Lua serde functions
-        {{ lserde.generate(struct.expose) }}
+        {{ lserde.toLuaTable(struct.expose) }}
+        {{ lserde.fromLuaTable(struct.split) }}
 
         // JSON serde functions
         {{ jserde.generate(structName, struct.expose) }}

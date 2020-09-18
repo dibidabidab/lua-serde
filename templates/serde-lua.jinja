@@ -1,9 +1,4 @@
-{% macro generate(struct) %}
-    {{ fromLuaTable(struct) }}
-    {{ toLuaTable(struct) }}
-{% endmacro %}
-
-{% macro fromLuaTable(struct) %}
+{% macro fromLuaTableOld(struct) %}
     void fromLuaTable(const sol::table &table) {
         {% for field in struct %}
             lua_converter<{{ field.typ }}>::fromLua(table["{{ field.name }}"], {{ field.name }});
@@ -20,4 +15,56 @@
             };
         {% endfor %}
     }
+{% endmacro %}
+
+{% macro fromLuaTable(splits) %}
+    void fromLuaTable(const sol::table &table) {
+        {% if splits.mode != 'empty' %}
+            for (const auto &[key, value] : table]) {
+                #ifndef NDEBUG
+                    if (!componentName.is<std::string>())
+                        throw gu_err("All keys in the table must be a string!");
+                #endif
+
+                {% if splits.mode != 'singleton' and splits.mode != 'empty' %}
+                auto name = key.as<std::string>();
+                {% endif %}
+
+                {{ createSplit(splits) }}
+            }
+        {% endif %}
+{% endmacro %}
+
+{% macro createSplit(splits) %}
+    {% if splits.mode == 'singleton' %}
+        #ifndef NDEBUG
+        if (name != "{{ splits.value.name }}")
+            throw gu_err("Name not in table: " + name + ", did you mean {{ splits.value.name }}?");
+        #endif
+        lua_converter<{{ splits.value.typ }}>::fromLua(value, {{ splits.value.name }});
+    {% elif splits.mode == 'length' %}
+        switch (name.length()) {
+            {{ splitCases(splits.buckets) }}
+            {{ switchDefault() }}
+        }
+    {% elif splits.mode == 'letter' %}
+        switch (name[{{ splits.index}}]) {
+            {{ splitCases(splits.buckets) }}
+            {{ switchDefault() }}
+        }
+    {% endif %}
+{% endmacro %}
+
+{% macro splitCases(cases) %}
+    {% for case in cases %}
+        case {{ case.key }}:
+            {{ createSplit(case) }}
+            break;
+    {% endfor %}
+{% endmacro %}
+
+{% macro switchDefault() %}
+    default:
+        throw gu_err("Name not in table: " + name);
+        break;
 {% endmacro %}
