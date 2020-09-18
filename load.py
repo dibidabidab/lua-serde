@@ -50,10 +50,10 @@ def prepareStruct(struct):
     cpp_only = popOr(struct, '_cpp_only', {})
     methods = popOr(struct, '_methods', [])
     hash = popOr(struct, '_hash', None)
-    options = popOr(struct, '_options', [])
+    flags = popOr(struct, '_flags', [])
 
     return {
-        'options': optionsDict(options),
+        'flags': flagDict(flags),
         'expose': prepareVars(struct),
         'cpp_only': prepareVars(cpp_only),
         'methods': methods,
@@ -61,16 +61,16 @@ def prepareStruct(struct):
     }
 
 
-def optionsDict(options):
+def flagDict(flags):
     dict = {
         'json_with_keys': False,
         'not_a_component': False,
     }
 
-    for option in options:
-        if not option in dict:
-            raise Exception('Invalid option: ' + option)
-        dict[option] = True
+    for flag in flags:
+        if not flag in dict:
+            raise Exception('Invalid flag: ' + flag)
+        dict[flag] = True
 
 
 class Field:

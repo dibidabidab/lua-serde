@@ -2,7 +2,7 @@ config:
   namespace: dibidabidab
 
 A:
-  _options:
+  _flags:
     - json_with_keys
 
   b: [B, NULL]
