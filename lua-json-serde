@@ -31,7 +31,7 @@ for ast in astList:
 
     outPath = path.join(outputDir, filename)
 
-    if Path(outPath).read_text() == render:
+    if Path(outPath).exists() and Path(outPath).read_text() == render:
         print(filename + " unchanged")
         continue
 
