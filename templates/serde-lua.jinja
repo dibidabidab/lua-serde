@@ -20,9 +20,9 @@
 {% macro fromLuaTable(splits) %}
     void fromLuaTable(const sol::table &table) {
         {% if splits.mode != 'empty' %}
-            for (const auto &[key, value] : table]) {
+            for (const auto &[key, value] : table) {
                 #ifndef NDEBUG
-                    if (!componentName.is<std::string>())
+                    if (!key.is<std::string>())
                         throw gu_err("All keys in the table must be a string!");
                 #endif
 
@@ -33,13 +33,14 @@
                 {{ createSplit(splits) }}
             }
         {% endif %}
+    }
 {% endmacro %}
 
 {% macro createSplit(splits) %}
     {% if splits.mode == 'singleton' %}
         #ifndef NDEBUG
-        if (name != "{{ splits.value.name }}")
-            throw gu_err("Name not in table: " + name + ", did you mean {{ splits.value.name }}?");
+        if (key.as<std::string>() != "{{ splits.value.name }}")
+            throw gu_err("Name not in table: " + key.as<std::string>() + ", did you mean {{ splits.value.name }}?");
         #endif
         lua_converter<{{ splits.value.typ }}>::fromLua(value, {{ splits.value.name }});
     {% elif splits.mode == 'length' %}
