@@ -25,7 +25,8 @@
         { {{ types(struct, '"', '", ') }} },
         { {{ types(struct, 'isFieldTypePrimitive<', '>(), ') }} },
         { {{ types(struct, 'isStructFieldFixedSize<', '>(), ') }} },
-        SerializableStructInfo::getTypeHash<{{ structName }}>()
+        SerializableStructInfo::getTypeHash<{{ structName }}>(),
+        &{{ structName }}::generateLuaUserType
     );
 {% endmacro %}
 

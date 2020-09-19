@@ -71,3 +71,17 @@
         break;
     #endif
 {% endmacro %}
+
+
+{% macro generateLuaUserType(structName, struct) %}
+
+    static void generateLuaUserType(sol::state &lua)
+    {
+        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}");
+
+        {% for field in struct %}
+            luaUserType["{{ field.name }}"] = &{{ structName }}::{{ field.name }};
+        {% endfor %}
+    }
+
+{% endmacro %}

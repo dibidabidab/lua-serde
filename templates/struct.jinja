@@ -3,9 +3,40 @@
 {% import 'serde-json.jinja' as jserde %}
 {% import 'serde-lua.jinja' as lserde %}
 
+{{ hd.pragma_once(config.pragma_once) }}
+
 #include "{{ config.include_header }}"
 
-{{ hd.pragma_once(config.pragma_once) }}
+
+{{ hd.namespace(config.namespace) }}
+
+    {% for structName, struct in structs.items() %}
+
+        struct {{ structName }};
+
+    {% endfor %}
+
+{{ hd.namespace_end(config.namespace) }}
+
+{% for structName, struct in structs.items() %}
+
+
+    namespace sol {
+        template <>
+        struct is_to_stringable<
+            {% if config.namespace %}
+                {{ config.namespace }}::
+            {% endif %}
+
+            {{ structName }}
+
+        > : std::false_type {};
+    }
+
+
+{% endfor %}
+
+
 {{ hd.namespace(config.namespace) }}
 
 {% for structName, struct in structs.items() %}
@@ -19,9 +50,6 @@
         // Methods
         {{ prop.methods(struct.methods) }}
 
-        // Struct info (for in-game inspector)
-        {{ prop.structInfo(structName, struct.expose) }}
-
         // Component info (for in-game inspector)
         {% if not struct.flags.not_a_component %}
             {{ prop.componentInfo(structName, struct.expose) }}
@@ -33,9 +61,15 @@
         // Lua serde functions
         {{ lserde.toLuaTable(struct.expose) }}
         {{ lserde.fromLuaTable(struct.split) }}
+        {{ lserde.generateLuaUserType(structName, struct.expose) }}
 
         // JSON serde functions
         {{ jserde.generate(structName, struct.expose) }}
+
+
+        // Struct info (for in-game inspector)
+        {{ prop.structInfo(structName, struct.expose) }}
+
     };
 
     // implicit conversion JSON functions
