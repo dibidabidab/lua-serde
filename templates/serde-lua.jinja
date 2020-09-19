@@ -64,7 +64,9 @@
 {% endmacro %}
 
 {% macro switchDefault() %}
+    #ifndef NDEBUG
     default:
         throw gu_err("Name not in table: " + name);
         break;
+    #endif
 {% endmacro %}
