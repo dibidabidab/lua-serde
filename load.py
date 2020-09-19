@@ -5,7 +5,7 @@ import yaml
 
 
 def readMultiAST(paths, includeHeader):
-    return [readAST(path, includeHeader) for path in paths]
+    return [readAST(path.replace('\\', '/'), includeHeader) for path in paths]
 
 
 def readAST(configPath, includeHeader):
