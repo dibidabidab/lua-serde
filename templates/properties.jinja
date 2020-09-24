@@ -1,6 +1,14 @@
 {% macro fields(struct) %}
     {% for var in struct %}
-        {{ var.typ }} {{ var.name }}{% if var.default %} = {{ var.default }}{% endif %};
+        {{ var.typ }} {{ var.name }};
+    {% endfor %}
+{% endmacro %}
+
+{% macro init(struct) %}
+    {% for var in struct %}
+        {% if var.default %}
+            {{ var.name }} = {{ var.default }}
+        {% endif %}
     {% endfor %}
 {% endmacro %}
 

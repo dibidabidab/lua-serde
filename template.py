@@ -9,12 +9,14 @@ env = Environment(
     lstrip_blocks=True,
 )
 
-template = env.get_template('struct.jinja')
+hpptemplate = env.get_template('hpp.jinja')
+cpptemplate = env.get_template('cpp.jinja')
 
 
 def renderStructs(ast):
     genStringTrees(ast)
-    return template.render(structs=ast['structs'], config=ast['config'])
+    return (hpptemplate.render(structs=ast['structs'], config=ast['config']),
+        cpptemplate.render(structs=ast['structs'], config=ast['config'], filename=ast['filename']))
 
 
 def genStringTrees(ast):

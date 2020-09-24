@@ -4,16 +4,16 @@ from os import path
 import yaml
 
 
-def readMultiAST(paths, includeHeader):
-    return [readAST(path.replace('\\', '/'), includeHeader) for path in paths]
+def readMultiAST(paths):
+    return [readAST(path.replace('\\', '/')) for path in paths]
 
 
-def readAST(configPath, includeHeader):
+def readAST(configPath):
     print("File: " + configPath)
     file = open(configPath)
     structs = yaml.load(file, Loader=yaml.FullLoader)
     basepath, _ = path.splitext(configPath)
-    return prepareAST(structs, basepath, includeHeader)
+    return prepareAST(structs, basepath)
 
 
 # Prepare for generation
@@ -22,14 +22,20 @@ def popOr(dict, key, default):
         return dict.pop(key)
     return default
 
+def mustExist(dict, key, default):
+    if not key in dict:
+        dict[key] = default
 
-def prepareAST(structs, basepath, includeHeader):
+
+def prepareAST(structs, basepath):
     config = popOr(structs, 'config', {})
     for key in structs:
         print("      " + key)
         structs[key] = prepareStruct(structs[key])
-    config['pragma_once'] = basepath.replace('.', '_').replace('/', '_')
-    config['include_header'] = includeHeader
+    config['pragma_once'] = basepath.replace('.', '_').replace('/', '_').replace('\\', '_')
+    mustExist(config, 'fwd_decl', [])
+    mustExist(config, 'hpp_incl', [])
+    mustExist(config, 'cpp_incl', [])
 
     return {
         'config': config,

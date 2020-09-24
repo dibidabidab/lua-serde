@@ -7,41 +7,35 @@ from pathlib import Path
 from load import readMultiAST
 from template import renderStructs
 
-if len(argv) < 4:
+if len(argv) != 3:
     print("Usage: ")
-    print("lua-json-serde <outputdir> <includeheader> <inputdir>")
+    print("lua-json-serde <outputdir> <inputdir>")
     exit(0)
 
 outputDir = argv[1]
-includeHeader = argv[2]
-configs = glob(argv[3] + "/**/*.yaml", recursive=True)
+configs = glob(argv[2] + "/**/*.yaml", recursive=True)
 
 if not path.exists(outputDir):
     makedirs(outputDir)
 
-astList = readMultiAST(configs, includeHeader)
+astList = readMultiAST(configs)
 generatedFiles = []
 
-for ast in astList:
-    render = renderStructs(ast)
+def writeRender(render, filename):
+    filePath = path.join(outputDir, filename)
 
-    filename = ast['filename'] + '.hpp'
-    generatedFiles.append(filename)
+    if Path(filePath).exists() and Path(filePath).read_text() == render:
+        print("Skipping {}, unchanged".format(filename))
+        return
+    print("Writing  {}".format(filename))
 
-    outPath = path.join(outputDir, filename)
-
-    if Path(outPath).exists() and Path(outPath).read_text() == render:
-        print(filename + " unchanged")
-        continue
-
-    file = open(outPath, 'w')
+    file = open(filePath, 'w')
     file.write(render)
     file.close()
 
-# file = open(path.join(outputDir, 'include_all.hpp'), 'w')
-# file.writelines(['#include "' + filename + '"\n' for filename in generatedFiles])
-# file.close()
 
+for ast in astList:
+    hpprender, cpprender = renderStructs(ast)
 
-
-
+    writeRender(hpprender, ast['filename'] + '.hpp')
+    writeRender(cpprender, ast['filename'] + '.cpp')

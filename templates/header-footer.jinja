@@ -22,3 +22,15 @@
         }
     {% endif %}
 {% endmacro %}
+
+{% macro include(includes) %}
+    {% for include in includes %}
+        #include "{{ include }}"
+    {%endfor%}
+{% endmacro %}
+
+{% macro forward_declare(fwds) %}
+    {% for fwd in fwds %}
+        type {{ fwd }};
+    {% endfor %}
+{% endmacro %}

@@ -1,0 +1,33 @@
+{% import 'header-footer.jinja' as hd %}
+{% import 'properties.jinja' as prop %}
+{% import 'serde-json.jinja' as jserde %}
+{% import 'serde-lua.jinja' as lserde %}
+{% import 'stubs.jinja' as stubs %}
+
+{{ hd.namespace(config.namespace) }}
+
+{{ hd.include(config.cpp_incl) }}
+#include "{{ filename }}.hpp"
+
+{% for structName, struct in structs.items() %}
+    /**
+     * STRUCT {{ structName }}
+     */
+
+    {{ structName }}::{{ structName }}() {
+        {{ prop.init(struct.expose) }}
+        {{ prop.init(struct.cpp_only) }}
+    }
+
+    // Lua serde functions
+    {{ lserde.toLuaTable(structName, struct.expose) }}
+    {{ lserde.fromLuaTable(structName, struct.split) }}
+
+    // JSON serde functions
+    {{ jserde.generate(structName, struct.expose) }}
+
+    // implicit conversion JSON functions
+    {{ jserde.implicitConversionFunctions(structName, struct.flags.json_with_keys) }}
+{% endfor %}
+
+{{ hd.namespace_end(config.namespace) }}
