@@ -67,7 +67,7 @@
 
 {% macro generateLuaUserType(structName, struct) %}
 
-    static void generateLuaUserType(sol::state &lua)
+    void {{ structName }}::generateLuaUserType(sol::state &lua)
     {
         sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}"
 
@@ -86,7 +86,7 @@
 
 {% macro registerEntityEngineFunctions(structName, struct) %}
 
-static void registerEntityEngineFunctions(sol::table &table, entt::registry &reg)
+void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::registry &reg)
 {
     auto utilsTable = table["{{ structName }}"].get_or_create<sol::table>();
 

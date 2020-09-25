@@ -4,11 +4,18 @@
     {% endfor %}
 {% endmacro %}
 
+{% macro defaultValue(field) %}
+    {% if field.default %}      {{ field.default }}     {% else %}      {{ field.typ }}()   {% endif %}
+{% endmacro %}
+
 {% macro init(struct) %}
-    {% for var in struct %}
-        {% if var.default %}
-            {{ var.name }} = {{ var.default }}
-        {% endif %}
+
+    {% if struct[0] %}
+        {{ struct[0].name }}({{ defaultValue(struct[0]) }})
+    {% endif %}
+
+    {% for var in struct[1:] %}
+        , {{ var.name }}({{ defaultValue(var) }})
     {% endfor %}
 {% endmacro %}
 

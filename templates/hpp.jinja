@@ -5,11 +5,35 @@
 {% import 'stubs.jinja' as stubs %}
 
 {{ hd.pragma_once(config.pragma_once) }}
-{{ hd.namespace(config.namespace) }}
 
 {{ hd.include(config.hpp_incl) }}
 
 {{ hd.forward_declare(config.fwd_decl) }}
+
+{{ hd.namespace(config.namespace) }}
+
+    {% for structName, struct in structs.items() %} {# forward declare the structs, for use in sol::is_to_stringable #}
+        struct {{ structName }};
+    {% endfor %}
+
+{{ hd.namespace_end(config.namespace) }}
+
+{% for structName, struct in structs.items() %}
+
+    template <>
+    struct sol::is_to_stringable<
+        {% if config.namespace %}
+            {{ config.namespace }}::
+        {% endif %}
+
+        {{ structName }}
+
+    > : std::false_type {};
+
+{% endfor %}
+
+
+{{ hd.namespace(config.namespace) }}
 
 {% for structName, struct in structs.items() %}
     struct {{ structName }} {
@@ -20,14 +44,15 @@
         {{ prop.fields(struct.cpp_only) }}
 
         // Method declarations
-        {{ stubs.stubs(structName) }}
+        {{ stubs.stubs(structName, struct) }}
         {{ prop.methods(struct.methods) }}
 
         // Struct info (for in-game inspector)
         {{ prop.structInfo(structName, struct.expose) }}
 
-        // Component info (for in-game inspector)
         {% if not struct.flags.not_a_component %}
+
+            // Component info (for in-game inspector)
             {{ prop.componentInfo(structName, struct.expose) }}
 
             // Hash function
@@ -36,7 +61,7 @@
     };
 
     // implicit conversion JSON functions
-    {{ stubs.static_stubs(structName) }});
+    {{ jserde.implicitConversionFunctions(structName, struct.flags.json_with_keys) }}
 
 {% endfor %}
 

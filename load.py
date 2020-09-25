@@ -34,8 +34,9 @@ def prepareAST(structs, basepath):
         structs[key] = prepareStruct(structs[key])
     config['pragma_once'] = basepath.replace('.', '_').replace('/', '_').replace('\\', '_')
     mustExist(config, 'fwd_decl', [])
-    mustExist(config, 'hpp_incl', [])
     mustExist(config, 'cpp_incl', [])
+    mustExist(config, 'hpp_incl', [])
+    config["hpp_incl"].append("../macro_magic/component.h")
 
     return {
         'config': config,

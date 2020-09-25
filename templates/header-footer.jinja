@@ -31,6 +31,6 @@
 
 {% macro forward_declare(fwds) %}
     {% for fwd in fwds %}
-        type {{ fwd }};
+        struct {{ fwd }};
     {% endfor %}
 {% endmacro %}

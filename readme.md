@@ -1,5 +1,5 @@
 # The great lua-json-serde struct generator
-#### For hilkojj/dibidabidab
+#### Made for [dibidab-engine](https://github.com/dibidabidab/dibidab-engine)
 
 ## Dependencies:
 
