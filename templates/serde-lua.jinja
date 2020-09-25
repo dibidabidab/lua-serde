@@ -1,13 +1,5 @@
-{% macro fromLuaTableOld(struct) %}
-    void fromLuaTable(const sol::table &table) {
-        {% for field in struct %}
-            lua_converter<{{ field.typ }}>::fromLua(table["{{ field.name }}"], {{ field.name }});
-        {% endfor %}
-    }
-{% endmacro %}
-
-{% macro toLuaTable(struct) %}
-    void toLuaTable(sol::table &table) const {
+{% macro toLuaTable(name, struct) %}
+    void {{ name }}::toLuaTable(sol::table &table) const {
         {% for field in struct %}
             {
                 auto ref = table["{{ field.name }}"];
@@ -17,8 +9,8 @@
     }
 {% endmacro %}
 
-{% macro fromLuaTable(splits) %}
-    void fromLuaTable(const sol::table &table) {
+{% macro fromLuaTable(name, splits) %}
+    void {{ name }}::fromLuaTable(const sol::table &table) {
         {% if splits.mode != 'empty' %}
             for (const auto &[key, value] : table) {
                 #ifndef NDEBUG

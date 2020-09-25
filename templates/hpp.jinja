@@ -1,0 +1,44 @@
+{% import 'header-footer.jinja' as hd %}
+{% import 'properties.jinja' as prop %}
+{% import 'serde-json.jinja' as jserde %}
+{% import 'serde-lua.jinja' as lserde %}
+{% import 'stubs.jinja' as stubs %}
+
+{{ hd.pragma_once(config.pragma_once) }}
+{{ hd.namespace(config.namespace) }}
+
+{{ hd.include(config.hpp_incl) }}
+
+{{ hd.forward_declare(config.fwd_decl) }}
+
+{% for structName, struct in structs.items() %}
+    struct {{ structName }} {
+        // Variables exposed to Lua
+        {{ prop.fields(struct.expose) }}
+
+        // Variables not exposed to Lua
+        {{ prop.fields(struct.cpp_only) }}
+
+        // Method declarations
+        {{ stubs.stubs(structName) }}
+        {{ prop.methods(struct.methods) }}
+
+        // Struct info (for in-game inspector)
+        {{ prop.structInfo(structName, struct.expose) }}
+
+        // Component info (for in-game inspector)
+        {% if not struct.flags.not_a_component %}
+            {{ prop.componentInfo(structName, struct.expose) }}
+
+            // Hash function
+            {{ prop.hash(struct.hash) }}
+        {% endif %}
+    };
+
+    // implicit conversion JSON functions
+    {{ stubs.static_stubs(structName) }});
+
+{% endfor %}
+
+{{ hd.namespace_end(config.namespace) }}
+{{ hd.pragma_once_end(config.pragma_once) }}

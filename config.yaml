@@ -1,5 +1,16 @@
 config:
   namespace: dibidabidab
+  hpp_incl:
+    - dibidabidab.hpp
+    - nothing.hpp
+    - compiletime.hpp
+  cpp_incl:
+    - cpp_only.hpp
+    - hpp_no_include.hpp
+  fwd_decl:
+    - typ1
+    - typ2
+    - typ3
 
 A:
   _flags:
