@@ -3,7 +3,7 @@
         {% for field in struct %}
             {
                 auto ref = table["{{ field.name }}"];
-                lua_converter<{{ field.typ }}>::toLua(ref, {{ field.name }});
+                lua_converter<{{ field.typ }}>::toLua(ref, this->{{ field.name }});
             };
         {% endfor %}
     }
@@ -34,7 +34,7 @@
         if (key.as<std::string>() != "{{ splits.value.name }}")
             throw gu_err("Name not in table: " + key.as<std::string>() + ", did you mean {{ splits.value.name }}?");
         #endif
-        lua_converter<{{ splits.value.typ }}>::fromLua(value, {{ splits.value.name }});
+        lua_converter<{{ splits.value.typ }}>::fromLua(value, this->{{ splits.value.name }});
     {% elif splits.mode == 'length' %}
         switch (name.length()) {
             {{ splitCases(splits.buckets) }}
