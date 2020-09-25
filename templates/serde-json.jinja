@@ -56,17 +56,17 @@
     static void to_json(json &j, const {{ structName }} &v)
     {
         {% if withKeys %}
-        v.toJsonArray(j);
-        {% else %}
         v.toJson(j);
+        {% else %}
+        v.toJsonArray(j);
         {% endif %}
     }
     static void from_json(const json &j, {{ structName }} &v)
     {
         {% if withKeys %}
-        v.fromJsonArray(j);
-        {% else %}
         v.fromJson(j);
+        {% else %}
+        v.fromJsonArray(j);
         {% endif %}
     }
 

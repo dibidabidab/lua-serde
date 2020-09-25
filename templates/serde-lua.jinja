@@ -77,11 +77,45 @@
 
     static void generateLuaUserType(sol::state &lua)
     {
-        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}");
+        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}"
 
-        {% for field in struct %}
+        {% if struct.flags.not_a_component == False %}
+                , sol::constructors<{{ structName }}(), {{ structName }}(const sol::table &)>()
+        {% endif %}
+
+        );
+
+        {% for field in struct.expose %}
             luaUserType["{{ field.name }}"] = &{{ structName }}::{{ field.name }};
         {% endfor %}
     }
+
+{% endmacro %}
+
+{% macro registerEntityEngineFunctions(structName, struct) %}
+
+static void registerEntityEngineFunctions(sol::table &table, entt::registry &reg)
+{
+    auto utilsTable = table["{{ structName }}"].get_or_create<sol::table>();
+
+    utilsTable["getFor"] = [&] (int entity) -> {{ structName }} * {
+
+        {% if not struct.expose %} // struct.expose is empty
+
+            throw gu_err("{{ structName }} is an empty struct thus cannot be returned.");
+
+        {% else %}
+
+            return &reg.get_or_assign<{{ structName }}>(entt::entity(entity));
+
+        {% endif %}
+    };
+    utilsTable["has"] = [&] (int entity) -> bool {
+        return reg.has<{{ structName }}>(entt::entity(entity));
+    };
+    utilsTable["remove"] = [&] (int entity) {
+        reg.remove_if_exists<{{ structName }}>(entt::entity(entity));
+    };
+}
 
 {% endmacro %}

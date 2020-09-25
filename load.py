@@ -73,6 +73,8 @@ def flagDict(flags):
             raise Exception('Invalid flag: ' + flag)
         dict[flag] = True
 
+    return dict
+
 
 class Field:
     def __init__(self, name, typ, default=None):
