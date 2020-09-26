@@ -41,7 +41,6 @@
 
 
     // Lua serde functions
-    {{ lserde.toLuaTable(structName, struct.expose) }}
     {{ lserde.fromLuaTable(structName, struct.split) }}
     {{ lserde.generateLuaUserType(structName, struct) }}
 

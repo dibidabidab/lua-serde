@@ -1,13 +1,3 @@
-{% macro toLuaTable(name, struct) %}
-    void {{ name }}::toLuaTable(sol::table &table) const {
-        {% for field in struct %}
-            {
-                auto ref = table["{{ field.name }}"];
-                lua_converter<{{ field.typ }}>::toLua(ref, this->{{ field.name }});
-            };
-        {% endfor %}
-    }
-{% endmacro %}
 
 {% macro fromLuaTable(name, splits) %}
     void {{ name }}::fromLuaTable(const sol::table &table) {
@@ -33,8 +23,14 @@
         #ifndef NDEBUG
         if (key.as<std::string>() != "{{ splits.value.name }}")
             throw gu_err("Name not in table: " + key.as<std::string>() + ", did you mean {{ splits.value.name }}?");
+        {
+            auto optional = value.as<sol::optional<{{ splits.value.typ }}>>();
+            if (!optional.has_value())
+                throw gu_err("Could not convert value given for '{{ splits.value.name }}' to {{ splits.value.typ }}!\n");
+            this->{{ splits.value.name }} = optional.value();
+        }
         #endif
-        lua_converter<{{ splits.value.typ }}>::fromLua(value, this->{{ splits.value.name }});
+
     {% elif splits.mode == 'length' %}
         switch (name.length()) {
             {{ splitCases(splits.buckets) }}

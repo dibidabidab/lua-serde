@@ -10,12 +10,8 @@
 
 {% macro init(struct) %}
 
-    {% if struct[0] %}
-        {{ struct[0].name }}({{ defaultValue(struct[0]) }})
-    {% endif %}
-
-    {% for var in struct[1:] %}
-        , {{ var.name }}({{ defaultValue(var) }})
+    {% for var in struct %}
+        {% if loop.index0 != 0 %} , {% endif %} {{ var.name }}({{ defaultValue(var) }})
     {% endfor %}
 {% endmacro %}
 
