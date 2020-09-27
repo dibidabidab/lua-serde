@@ -1,9 +1,9 @@
 {% macro stubs(name, struct) %}
     {{ name }}();
 
-    {% if struct.flags.not_a_component == False %}
+    {{ name }}(const sol::table &);
 
-        {{ name }}(const sol::table &);
+    {% if struct.flags.not_a_component == False %}
 
         static void registerEntityEngineFunctions(sol::table &, entt::registry &);
     {% endif %}

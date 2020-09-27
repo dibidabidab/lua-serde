@@ -27,15 +27,14 @@
     {% endif %}
     {}
 
+    {{ structName }}::{{ structName }}(const sol::table &table)
+    : {{ structName }}() // call other constructor first, to initialize default values
+    {
+        fromLuaTable(table);
+    }
+
 
     {% if struct.flags.not_a_component == False %}
-
-        {{ structName }}::{{ structName }}(const sol::table &table)
-            : {{ structName }}() // call other constructor first, to initialize default values
-        {
-            fromLuaTable(table);
-        }
-
         {{ lserde.registerEntityEngineFunctions(structName, struct) }}
     {% endif %}
 

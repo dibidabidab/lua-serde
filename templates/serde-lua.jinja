@@ -65,12 +65,10 @@
 
     void {{ structName }}::generateLuaUserType(sol::state &lua)
     {
-        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}"
+        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}",
 
-        {% if struct.flags.not_a_component == False %}
-                , sol::constructors<{{ structName }}(), {{ structName }}(const sol::table &)>()
-        {% endif %}
-
+            sol::call_constructor,
+            sol::constructors<{{ structName }}(), {{ structName }}(const sol::table &)>()
         );
 
         {% for field in struct.expose %}
@@ -91,11 +89,19 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
         {% if not struct.expose %} // struct.expose is empty
 
             throw gu_err("{{ structName }} is an empty struct thus cannot be returned.");
-
         {% else %}
 
             return &reg.get_or_assign<{{ structName }}>(entt::entity(entity));
+        {% endif %}
+    };
+    utilsTable["tryGetFor"] = [&] (int entity) -> {{ structName }} * {
 
+        {% if not struct.expose %} // struct.expose is empty
+
+            return NULL;
+        {% else %}
+
+            return reg.try_get<{{ structName }}>(entt::entity(entity));
         {% endif %}
     };
     utilsTable["has"] = [&] (int entity) -> bool {

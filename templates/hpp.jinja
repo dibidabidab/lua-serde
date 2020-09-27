@@ -12,29 +12,6 @@
 
 {{ hd.namespace(config.namespace) }}
 
-    {% for structName, struct in structs.items() %} {# forward declare the structs, for use in sol::is_to_stringable #}
-        struct {{ structName }};
-    {% endfor %}
-
-{{ hd.namespace_end(config.namespace) }}
-
-{% for structName, struct in structs.items() %}
-
-    template <>
-    struct sol::is_to_stringable<
-        {% if config.namespace %}
-            {{ config.namespace }}::
-        {% endif %}
-
-        {{ structName }}
-
-    > : std::false_type {};
-
-{% endfor %}
-
-
-{{ hd.namespace(config.namespace) }}
-
 {% for structName, struct in structs.items() %}
     struct {{ structName }} {
         // Variables exposed to Lua
