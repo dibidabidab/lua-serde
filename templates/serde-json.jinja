@@ -30,7 +30,7 @@
     void {{ structName }}::fromJson(const json &j) {
         {% for field in struct %}
             if (j.contains("{{ field.name }}"))
-                getTo({{ field.name }}, j.at("{{ field.name }}"));
+                {{ field.name }} = j.at("{{ field.name }}") {% if field.typ != "json" %} .get<{{ field.typ }}>() {% endif %};
         {% endfor %}
     }
 {% endmacro %}
@@ -38,7 +38,7 @@
 {% macro fromJsonArray(structName, struct) %}
     void {{ structName }}::fromJsonArray(const json &j) {
         {% for field in struct %}
-            getTo({{ field.name }}, j.at({{ loop.index0 }}));
+            {{ field.name }} = j.at({{ loop.index0 }}) {% if field.typ != "json" %} .get<{{ field.typ }}>() {% endif %};
         {% endfor %}
     }
 {% endmacro %}
@@ -56,17 +56,17 @@
     static void to_json(json &j, const {{ structName }} &v)
     {
         {% if withKeys %}
-        v.toJsonArray(j);
-        {% else %}
         v.toJson(j);
+        {% else %}
+        v.toJsonArray(j);
         {% endif %}
     }
     static void from_json(const json &j, {{ structName }} &v)
     {
         {% if withKeys %}
-        v.fromJsonArray(j);
-        {% else %}
         v.fromJson(j);
+        {% else %}
+        v.fromJsonArray(j);
         {% endif %}
     }
 

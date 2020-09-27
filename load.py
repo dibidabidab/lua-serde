@@ -34,8 +34,9 @@ def prepareAST(structs, basepath):
         structs[key] = prepareStruct(structs[key])
     config['pragma_once'] = basepath.replace('.', '_').replace('/', '_').replace('\\', '_')
     mustExist(config, 'fwd_decl', [])
-    mustExist(config, 'hpp_incl', [])
     mustExist(config, 'cpp_incl', [])
+    mustExist(config, 'hpp_incl', [])
+    config["hpp_incl"].append("../macro_magic/component.h")
 
     return {
         'config': config,
@@ -78,6 +79,8 @@ def flagDict(flags):
         if not flag in dict:
             raise Exception('Invalid flag: ' + flag)
         dict[flag] = True
+
+    return dict
 
 
 class Field:

@@ -5,11 +5,12 @@
 {% import 'stubs.jinja' as stubs %}
 
 {{ hd.pragma_once(config.pragma_once) }}
-{{ hd.namespace(config.namespace) }}
 
 {{ hd.include(config.hpp_incl) }}
 
 {{ hd.forward_declare(config.fwd_decl) }}
+
+{{ hd.namespace(config.namespace) }}
 
 {% for structName, struct in structs.items() %}
     struct {{ structName }} {
@@ -20,14 +21,15 @@
         {{ prop.fields(struct.cpp_only) }}
 
         // Method declarations
-        {{ stubs.stubs(structName) }}
+        {{ stubs.stubs(structName, struct) }}
         {{ prop.methods(struct.methods) }}
 
         // Struct info (for in-game inspector)
         {{ prop.structInfo(structName, struct.expose) }}
 
-        // Component info (for in-game inspector)
         {% if not struct.flags.not_a_component %}
+
+            // Component info (for in-game inspector)
             {{ prop.componentInfo(structName, struct.expose) }}
 
             // Hash function
@@ -36,7 +38,7 @@
     };
 
     // implicit conversion JSON functions
-    {{ stubs.static_stubs(structName) }});
+    {{ jserde.implicitConversionFunctions(structName, struct.flags.json_with_keys) }}
 
 {% endfor %}
 

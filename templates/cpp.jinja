@@ -4,30 +4,48 @@
 {% import 'serde-lua.jinja' as lserde %}
 {% import 'stubs.jinja' as stubs %}
 
-{{ hd.namespace(config.namespace) }}
-
 {{ hd.include(config.cpp_incl) }}
 #include "{{ filename }}.hpp"
+
+{{ hd.namespace(config.namespace) }}
 
 {% for structName, struct in structs.items() %}
     /**
      * STRUCT {{ structName }}
      */
 
-    {{ structName }}::{{ structName }}() {
+    {{ structName }}::{{ structName }}()
+
+    {% if struct.expose[0] or struct.cpp_only[0] %} {# struct has at least 1 field to initialize #}
+        :
         {{ prop.init(struct.expose) }}
+
+        {% if struct.expose[0] and struct.cpp_only[0] %}    ,   {% endif %}
+
         {{ prop.init(struct.cpp_only) }}
+
+    {% endif %}
+    {}
+
+    {{ structName }}::{{ structName }}(const sol::table &table)
+    : {{ structName }}() // call other constructor first, to initialize default values
+    {
+        fromLuaTable(table);
     }
 
+
+    {% if struct.flags.not_a_component == False %}
+        {{ lserde.registerEntityEngineFunctions(structName, struct) }}
+    {% endif %}
+
+
     // Lua serde functions
-    {{ lserde.toLuaTable(structName, struct.expose) }}
     {{ lserde.fromLuaTable(structName, struct.split) }}
+    {{ lserde.generateLuaUserType(structName, struct) }}
 
     // JSON serde functions
     {{ jserde.generate(structName, struct.expose) }}
 
-    // implicit conversion JSON functions
-    {{ jserde.implicitConversionFunctions(structName, struct.flags.json_with_keys) }}
 {% endfor %}
 
 {{ hd.namespace_end(config.namespace) }}
