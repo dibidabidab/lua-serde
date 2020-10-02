@@ -4,16 +4,16 @@ from os import path
 import yaml
 
 
-def readMultiAST(paths):
-    return [readAST(path.replace('\\', '/')) for path in paths]
+def readMultiAST(paths, includeHeader):
+    return [readAST(path.replace('\\', '/'), includeHeader) for path in paths]
 
 
-def readAST(configPath):
+def readAST(configPath, includeHeader):
     print("File: " + configPath)
     file = open(configPath)
     structs = yaml.load(file, Loader=yaml.FullLoader)
     basepath, _ = path.splitext(configPath)
-    return prepareAST(structs, basepath)
+    return prepareAST(structs, basepath, includeHeader)
 
 
 # Prepare for generation
@@ -27,7 +27,7 @@ def mustExist(dict, key, default):
         dict[key] = default
 
 
-def prepareAST(structs, basepath):
+def prepareAST(structs, basepath, includeHeader):
     config = popOr(structs, 'config', {})
     for key in structs:
         print("      " + key)
@@ -36,7 +36,7 @@ def prepareAST(structs, basepath):
     mustExist(config, 'fwd_decl', [])
     mustExist(config, 'cpp_incl', [])
     mustExist(config, 'hpp_incl', [])
-    config["hpp_incl"].append("../macro_magic/component.h")
+    config["hpp_incl"].append(includeHeader)
 
     return {
         'config': config,

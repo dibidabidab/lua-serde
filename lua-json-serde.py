@@ -7,18 +7,19 @@ from pathlib import Path
 from load import readMultiAST
 from template import renderStructs
 
-if len(argv) != 3:
+if len(argv) != 4:
     print("Usage: ")
-    print("lua-json-serde <outputdir> <inputdir>")
+    print("lua-json-serde <outputdir> <inputdir> <includeheader>")
     exit(0)
 
 outputDir = argv[1]
 configs = glob(argv[2] + "/**/*.yaml", recursive=True)
+includeHeader = argv[3]
 
 if not path.exists(outputDir):
     makedirs(outputDir)
 
-astList = readMultiAST(configs)
+astList = readMultiAST(configs, includeHeader)
 generatedFiles = []
 
 def writeRender(render, filename):
