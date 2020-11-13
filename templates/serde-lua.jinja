@@ -125,7 +125,7 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
 
             animated.animationUpdateFunctions[field] = [interpolator, e, &reg, progress, duration, onFinished] (float deltaTime) mutable -> bool {
 
-                progress += deltaTime / duration;
+                progress = min(progress + deltaTime / duration, 1.f);
 
                 interpolator(reg.get_or_assign<{{ structName }}>(e), progress);
 
