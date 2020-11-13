@@ -110,7 +110,7 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
     utilsTable["remove"] = [&] (entt::entity entity) {
         reg.remove_if_exists<{{ structName }}>(entity);
     };
-    utilsTable["animate"] = [&] (entt::entity e, const char *field, sol::object goalValue, float duration, sol::safe_function onFinished) {
+    utilsTable["animate"] = [&] (entt::entity e, const char *field, sol::object goalValue, float duration, sol::optional<std::string> interpolateType, sol::optional<sol::safe_function> onFinished) {
 
         {% if not struct.expose %} // struct.expose is empty
 
@@ -119,19 +119,41 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
 
             auto interpolator = reg.get_or_assign<{{ structName }}>(e).getInterpolator(field, goalValue);
 
+            static const std::map<std::string, std::function<float(float)>> interpolateTypes = {
+                {"linear", [](float x) -> float { return x; }},
+                {"circleIn", [](float x) -> float { return Interpolation::circleIn(x); }},
+                {"circleOut", [](float x) -> float { return Interpolation::circleOut(x); }},
+                {"circle", [](float x) -> float { return Interpolation::circle(x); }},
+                {"pow2In", [](float x) -> float { return Interpolation::powIn(x, 2); }},
+                {"pow2Out", [](float x) -> float { return Interpolation::powOut(x, 2); }},
+                {"pow2", [](float x) -> float { return Interpolation::pow(x, 2); }},
+                {"pow3In", [](float x) -> float { return Interpolation::powIn(x, 3); }},
+                {"pow3Out", [](float x) -> float { return Interpolation::powOut(x, 3); }},
+                {"pow3", [](float x) -> float { return Interpolation::pow(x, 3); }},
+                {"pow4In", [](float x) -> float { return Interpolation::powIn(x, 4); }},
+                {"pow4Out", [](float x) -> float { return Interpolation::powOut(x, 4); }},
+                {"pow4", [](float x) -> float { return Interpolation::pow(x, 4); }},
+                {"pow5In", [](float x) -> float { return Interpolation::powIn(x, 5); }},
+                {"pow5Out", [](float x) -> float { return Interpolation::powOut(x, 5); }},
+                {"pow5", [](float x) -> float { return Interpolation::pow(x, 5); }},
+            };
+
+            auto &interpolateTypeFunc = interpolateTypes.at(interpolateType.value_or("linear"));
+
             Animated &animated = reg.get_or_assign<Animated>(e);
 
             float progress = 0;
 
-            animated.animationUpdateFunctions[field] = [interpolator, e, &reg, progress, duration, onFinished] (float deltaTime) mutable -> bool {
+            animated.animationUpdateFunctions[field] = [interpolator, &interpolateTypeFunc, e, &reg, progress, duration, onFinished] (float deltaTime) mutable -> bool {
 
                 progress = min(progress + deltaTime / duration, 1.f);
 
-                interpolator(reg.get_or_assign<{{ structName }}>(e), progress);
+                interpolator(reg.get_or_assign<{{ structName }}>(e), interpolateTypeFunc(progress));
 
                 if (progress >= 1)
                 {
-                    luau::tryCallFunction(onFinished);
+                    if (onFinished.has_value())
+                        luau::tryCallFunction(onFinished.value());
                     return true;
                 }
                 return false;
