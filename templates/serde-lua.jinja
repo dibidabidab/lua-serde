@@ -84,32 +84,89 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
 {
     auto utilsTable = table["{{ structName }}"].get_or_create<sol::table>();
 
-    utilsTable["getFor"] = [&] (int entity) -> {{ structName }} * {
+    utilsTable["getFor"] = [&] (entt::entity entity) -> {{ structName }} * {
 
         {% if not struct.expose %} // struct.expose is empty
 
             throw gu_err("{{ structName }} is an empty struct thus cannot be returned.");
         {% else %}
 
-            return &reg.get_or_assign<{{ structName }}>(entt::entity(entity));
+            return &reg.get_or_assign<{{ structName }}>(entity);
         {% endif %}
     };
-    utilsTable["tryGetFor"] = [&] (int entity) -> {{ structName }} * {
+    utilsTable["tryGetFor"] = [&] (entt::entity entity) -> {{ structName }} * {
 
         {% if not struct.expose %} // struct.expose is empty
 
             return NULL;
         {% else %}
 
-            return reg.try_get<{{ structName }}>(entt::entity(entity));
+            return reg.try_get<{{ structName }}>(entity);
         {% endif %}
     };
-    utilsTable["has"] = [&] (int entity) -> bool {
-        return reg.has<{{ structName }}>(entt::entity(entity));
+    utilsTable["has"] = [&] (entt::entity entity) -> bool {
+        return reg.has<{{ structName }}>(entity);
     };
-    utilsTable["remove"] = [&] (int entity) {
-        reg.remove_if_exists<{{ structName }}>(entt::entity(entity));
+    utilsTable["remove"] = [&] (entt::entity entity) {
+        reg.remove_if_exists<{{ structName }}>(entity);
     };
+    utilsTable["animate"] = [&] (entt::entity e, const char *field, sol::object goalValue, float duration, sol::safe_function onFinished) {
+
+        {% if not struct.expose %} // struct.expose is empty
+
+            throw gu_err("Cannot animate empty Component ({{structName}})");
+        {% else %}
+
+            auto interpolator = reg.get_or_assign<{{ structName }}>(e).getInterpolator(field, goalValue);
+
+            Animated &animated = reg.get_or_assign<Animated>(e);
+
+            float progress = 0;
+
+            animated.animationUpdateFunctions[field] = [interpolator, e, &reg, progress, duration, onFinished] (float deltaTime) mutable -> bool {
+
+                progress += deltaTime / duration;
+
+                interpolator(reg.get_or_assign<{{ structName }}>(e), progress);
+
+                if (progress >= 1)
+                {
+                    luau::tryCallFunction(onFinished);
+                    return true;
+                }
+                return false;
+            };
+
+        {% endif %}
+
+    };
+}
+
+std::function<void({{ structName }} &, float)> {{ structName }}::getInterpolator(const std::string &fieldToInterpolate, sol::object goalValue) const
+{
+    {# TODO: call getInterpolator() on member when fieldToInterpolate == "field.interpolatable_field" #}
+    {% for field in struct.expose %}
+
+        if (fieldToInterpolate == "{{ field.name }}")
+        {
+            if (!goalValue.is<{{ field.typ }}>())
+                throw gu_err("Given goal value for '{{ structName }}." + fieldToInterpolate + "' is not a {{ field.typ }}");
+
+            {{ field.typ }} goalValTyped = goalValue.as<{{ field.typ }}>();
+            {{ field.typ }} startVal = this->{{ field.name }};
+
+            return [startVal, goalValTyped] ({{ structName }} &structt, float interpolate_x) {
+
+                Interpolation::interpolate(startVal, goalValTyped, interpolate_x, structt.{{ field.name }});
+            };
+        }
+        else
+
+    {% endfor %}
+
+    {
+        throw gu_err("Cannot get an interpolator for non-existing field '{{ structName }}." + fieldToInterpolate + "'!");
+    }
 }
 
 {% endmacro %}

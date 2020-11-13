@@ -6,6 +6,7 @@
     {% if struct.flags.not_a_component == False %}
 
         static void registerEntityEngineFunctions(sol::table &, entt::registry &);
+        std::function<void({{ name }} &, float)> getInterpolator(const std::string &, sol::object) const;
     {% endif %}
 
     void fromLuaTable(const sol::table &);
