@@ -23,13 +23,14 @@
         #ifndef NDEBUG
         if (key.as<std::string>() != "{{ splits.value.name }}")
             throw gu_err("Name not in table: " + key.as<std::string>() + ", did you mean {{ splits.value.name }}?");
+        #endif // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
         {
             auto optional = value.as<sol::optional<{{ splits.value.typ }}>>();
             if (!optional.has_value())
                 throw gu_err("Could not convert value given for '{{ splits.value.name }}' to {{ splits.value.typ }}!\n");
             this->{{ splits.value.name }} = optional.value();
         }
-        #endif
 
     {% elif splits.mode == 'length' %}
         switch (name.length()) {
