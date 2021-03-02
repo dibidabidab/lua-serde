@@ -154,7 +154,7 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
                 if (progress >= 1)
                 {
                     if (onFinished.has_value())
-                        luau::tryCallFunction(onFinished.value());
+                        luau::tryCallFunction(onFinished.value(), e);
                     return true;
                 }
                 return false;
