@@ -62,11 +62,16 @@
 {% endmacro %}
 
 
-{% macro generateLuaUserType(structName, struct) %}
+{% macro generateLuaUserType(structName, struct, namespace) %}
 
     void {{ structName }}::generateLuaUserType(sol::state &lua)
     {
-        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>("{{ structName }}",
+        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>(
+
+                {% if namespace %}
+                    "{{ namespace }}__"  // todo: sub-namespaces like Foo::Bar::Class
+                {% endif %}
+                "{{ structName }}",
 
             sol::call_constructor,
             sol::constructors<{{ structName }}(), {{ structName }}(const sol::table &)>()

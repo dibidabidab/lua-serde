@@ -25,7 +25,7 @@
         {{ prop.methods(struct.methods) }}
 
         // Struct info (for in-game inspector)
-        {{ prop.structInfo(structName, struct.expose) }}
+        {{ prop.structInfo(structName, struct.expose, config.namespace) }}
 
         {% if not struct.flags.not_a_component %}
 

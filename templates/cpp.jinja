@@ -41,7 +41,7 @@
 
     // Lua serde functions
     {{ lserde.fromLuaTable(structName, struct.split) }}
-    {{ lserde.generateLuaUserType(structName, struct) }}
+    {{ lserde.generateLuaUserType(structName, struct, config.namespace) }}
 
     // JSON serde functions
     {{ jserde.generate(structName, struct.expose) }}

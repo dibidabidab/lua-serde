@@ -29,8 +29,11 @@
     {% for var in struct %}{{ before }}{{ var.typ }}{{ after }}{% endfor %}
 {% endmacro %}
 
-{% macro structInfo(structName, struct) %}
+{% macro structInfo(structName, struct, namespace) %}
     inline static const SerializableStructInfo STRUCT_INFO = SerializableStructInfo(
+        {% if namespace %}
+            "{{ namespace }}::"  // todo: sub-namespaces like Foo::Bar::Class
+        {% endif %}
         "{{ structName }}",
         { {{ names(struct, '"', '", ') }} },
         { {{ types(struct, '"', '", ') }} },
