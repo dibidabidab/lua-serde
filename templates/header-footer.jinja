@@ -31,6 +31,13 @@
 
 {% macro forward_declare(fwds) %}
     {% for fwd in fwds %}
-        struct {{ fwd }};
+        {% if "::" in fwd %}
+            namespace {{ fwd.rsplit("::", 1)[0] }} {
+                struct {{ fwd.rsplit("::", 1)[-1] }};
+            }
+        {% else %}
+            struct {{ fwd }};
+        {% endif %}
+
     {% endfor %}
 {% endmacro %}
