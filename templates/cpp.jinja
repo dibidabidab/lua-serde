@@ -3,6 +3,7 @@
 {% import 'serde-json.jinja' as jserde %}
 {% import 'serde-lua.jinja' as lserde %}
 {% import 'stubs.jinja' as stubs %}
+{% import 'dirtying.jinja' as dirtying %}
 
 {{ hd.include(config.cpp_incl) }}
 #include "{{ filename }}.hpp"
@@ -37,6 +38,7 @@
         fromLuaTable(table);
     }
 
+    {{ dirtying.dirtyMethodsImpl(structName, struct) }}
 
     {% if struct.flags.not_a_component == False %}
         {{ lserde.registerEntityEngineFunctions(structName, struct) }}

@@ -23,7 +23,7 @@
 
         // Method declarations
         {{ stubs.stubs(structName, struct) }}
-        {{ dirtying.dirty_methods(structName, struct) }}
+        {{ dirtying.dirtyMethodsHeader(structName, struct) }}
         {{ prop.methods(struct.methods) }}
 
         // Struct info (for in-game inspector)
@@ -38,6 +38,8 @@
             {{ prop.hash(struct.hash) }}
         {% endif %}
     };
+
+    {{ dirtying.dirtyMethodSpecializations(structName, struct) }}
 
     // implicit conversion JSON functions
     {{ jserde.implicitConversionFunctions(structName, struct.flags.json_with_keys) }}
