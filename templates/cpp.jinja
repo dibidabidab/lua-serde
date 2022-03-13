@@ -25,7 +25,11 @@
         {{ prop.init(struct.cpp_only) }}
 
     {% endif %}
-    {}
+    {
+        {% if struct.flags.dirtyable %}
+        _allDirtyFlags = 0;
+        {% endif %}
+    }
 
     {{ structName }}::{{ structName }}(const sol::table &table)
     : {{ structName }}() // call other constructor first, to initialize default values
@@ -44,7 +48,7 @@
     {{ lserde.generateLuaUserType(structName, struct, config.namespace) }}
 
     // JSON serde functions
-    {{ jserde.generate(structName, struct.expose) }}
+    {{ jserde.generate(structName, struct.expose, struct.flags) }}
 
 {% endfor %}
 

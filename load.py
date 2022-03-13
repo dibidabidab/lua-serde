@@ -2,6 +2,7 @@
 from os import path
 
 import yaml
+import math
 
 
 def readMultiAST(paths, includeHeader):
@@ -26,12 +27,24 @@ def mustExist(dict, key, default):
     if not key in dict:
         dict[key] = default
 
+def moveFlags(key, struct):
+    splitted = key.split('@')
 
-def prepareAST(structs, basepath, includeHeader):
-    config = popOr(structs, 'config', {})
-    for key in structs:
-        print("      " + key)
-        structs[key] = prepareStruct(structs[key])
+    for flag in splitted[1:]:
+        if not "_flags" in struct:
+            struct["_flags"] = []
+        struct["_flags"].append(flag.strip())
+
+    return splitted[0].strip()
+
+
+def prepareAST(full, basepath, includeHeader):
+    config = popOr(full, 'config', {})
+    structs = {}
+    for key in full:
+        structName = moveFlags(key, full[key])
+        print("      " + structName)
+        structs[structName] = prepareStruct(full[key])
     config['pragma_once'] = basepath.replace('.', '_').replace('/', '_').replace('\\', '_')
     mustExist(config, 'fwd_decl', [])
     mustExist(config, 'cpp_incl', [])
@@ -47,25 +60,27 @@ def prepareAST(structs, basepath, includeHeader):
 
 def prepareStruct(struct):
     if struct is None or type(struct) is str:
-        return {
-            'flags': flagDict([]),
-            'expose': {},
-            'cpp_only': {},
-            'methods': [],
-            'hash': None,
-        }
+        struct = {}
 
     cpp_only = popOr(struct, '_cpp_only', {})
     methods = popOr(struct, '_methods', [])
     hash = popOr(struct, '_hash', None)
     flags = popOr(struct, '_flags', [])
 
+    nr_of_vars = len(struct) + len(cpp_only)
+    dirty_flags_type = "uint"
+    if nr_of_vars > 8:
+        dirty_flags_type += str(2**(math.ceil(math.log(nr_of_vars, 2))))
+    else:
+        dirty_flags_type += "8"
+
     return {
         'flags': flagDict(flags),
         'expose': prepareVars(struct),
         'cpp_only': prepareVars(cpp_only),
         'methods': methods,
-        'hash': hash
+        'hash': hash,
+        'dirty_flags_type': dirty_flags_type
     }
 
 
@@ -73,6 +88,7 @@ def flagDict(flags):
     dict = {
         'json_with_keys': False,
         'not_a_component': False,
+        'dirtyable': False,
     }
 
     for flag in flags:

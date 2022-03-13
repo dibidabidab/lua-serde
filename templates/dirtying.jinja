@@ -1,0 +1,95 @@
+{% macro dirty_methods(name, struct) %}
+    
+    {% if struct.flags.dirtyable %}
+        template <auto member>
+        void bedirt() {}
+
+        template <auto member>
+        bool undirt()
+        {
+            return false;
+        }
+
+        template <auto member>
+        bool dirty()
+        {
+            return false;
+        }
+
+        bool anyDirty()
+        {
+            return _allDirtyFlags != 0u;
+        }
+
+        void undirtAll()
+        {
+            _allDirtyFlags = decltype(_allDirtyFlags)();
+        }
+
+        void bedirtAll()
+        {
+            {% macro bedirtAll(struct) %}
+                {% for var in struct %}
+                    bedirt<&{{ name }}::{{ var.name }}>();
+                {% endfor %}
+            {% endmacro %}
+
+            {{ bedirtAll(struct.expose) }}
+            {{ bedirtAll(struct.cpp_only) }}
+        }
+
+      private:
+        union
+        {
+            struct DirtyFlags
+            {
+                {% macro flags(struct) %}
+                    {% for var in struct %}
+                        bool {{ var.name }}: 1;
+                    {% endfor %}
+                {% endmacro %}
+
+                {{ flags(struct.expose) }}
+                {{ flags(struct.cpp_only) }}
+
+            } _dirtyFlags;
+            {{ struct.dirty_flags_type }} _allDirtyFlags;
+        };
+
+      public:
+
+        {% macro methods(struct) %}
+            {% for var in struct %}
+
+                template <>
+                void bedirt<&{{ name }}::{{ var.name }}>()
+                {
+                    _dirtyFlags.{{var.name}} = true;
+                }
+
+                template <>
+                bool undirt<&{{ name }}::{{ var.name }}>()
+                {
+                    if (_dirtyFlags.{{var.name}})
+                    {
+                        _dirtyFlags.{{var.name}} = false;
+                        return true;
+                    }
+                    return false;
+                }
+
+                template <>
+                bool dirty<&{{ name }}::{{ var.name }}>()
+                {
+                    return _dirtyFlags.{{var.name}};
+                }
+
+            {% endfor %}
+        {% endmacro %}
+
+        {{ methods(struct.expose) }}
+        {{ methods(struct.cpp_only) }}
+
+    {% endif %}
+
+{% endmacro %}

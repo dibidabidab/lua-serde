@@ -66,20 +66,57 @@
 
     void {{ structName }}::generateLuaUserType(sol::state &lua)
     {
-        sol::usertype<{{ structName }}> luaUserType = lua.new_usertype<{{ structName }}>(
+        auto luaUserType = lua.new_usertype<{{ structName }}>(
 
-                {% if namespace %}
-                    "{{ namespace }}__"  // todo: sub-namespaces like Foo::Bar::Class
-                {% endif %}
-                "{{ structName }}",
+            {% if namespace %}
+                "{{ namespace }}__"  // todo: sub-namespaces like Foo::Bar::Class
+            {% endif %}
+            "{{ structName }}",
 
             sol::call_constructor,
             sol::constructors<{{ structName }}(), {{ structName }}(const sol::table &)>()
         );
 
-        {% for field in struct.expose %}
-            luaUserType["{{ field.name }}"] = &{{ structName }}::{{ field.name }};
-        {% endfor %}
+        {% if struct.flags.dirtyable %}
+
+            struct {{ structName }}_dirty
+            {
+                {{ structName }} *ptr;
+            };
+               
+            {% for field in struct.expose %}
+                luaUserType["{{ field.name }}"] = (const {{ field.typ }} {{ structName }}:: *) &{{ structName }}::{{ field.name }};
+            {% endfor %}
+
+            luaUserType["dirty"] = [] ({{ structName }} &clean) -> {{ structName }}_dirty {
+                return {{ structName }}_dirty { &clean };
+            };
+
+            auto dirtyUserType = lua.new_usertype<{{ structName }}_dirty>(
+
+                {% if namespace %}
+                    "{{ namespace }}__"  // todo: sub-namespaces like Foo::Bar::Class
+                {% endif %}
+                "{{ structName }}_dirty"
+            );
+
+            {% for field in struct.expose %}
+                dirtyUserType["{{ field.name }}"] = sol::property([] ({{ structName }}_dirty &dirty) {
+                    dirty.ptr->bedirt<&{{ structName }}::{{ field.name }}>();
+                    return dirty.ptr->{{ field.name }};
+                }, [] ({{ structName }}_dirty &dirty, const {{ field.typ }} &x) {
+                    dirty.ptr->bedirt<&{{ structName }}::{{ field.name }}>();
+                    dirty.ptr->{{ field.name }} = x;
+                });
+            {% endfor %}
+
+        {% else %}
+
+            {% for field in struct.expose %}
+                luaUserType["{{ field.name }}"] = &{{ structName }}::{{ field.name }};
+            {% endfor %}
+
+        {% endif %}
     }
 
 {% endmacro %}
@@ -186,6 +223,10 @@ std::function<void({{ structName }} &, float)> {{ structName }}::getInterpolator
             return [startVal, goalValTyped] ({{ structName }} &structt, float interpolate_x) {
 
                 Interpolation::interpolate(startVal, goalValTyped, interpolate_x, structt.{{ field.name }});
+
+                {% if struct.flags.dirtyable %}
+                    structt.bedirt<&{{ structName }}::{{ field.name }}>();
+                {% endif %}
             };
         }
         else

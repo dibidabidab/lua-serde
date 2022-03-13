@@ -1,9 +1,9 @@
-{% macro generate(structName, struct) %}
+{% macro generate(structName, struct, flags) %}
     {{ toJson(structName, struct) }}
     {{ toJsonArray(structName, struct) }}
-    {{ fromJson(structName, struct) }}
-    {{ fromJsonArray(structName, struct) }}
-    {{ copyFieldsFrom(structName, struct) }}
+    {{ fromJson(structName, struct, flags) }}
+    {{ fromJsonArray(structName, struct, flags) }}
+    {{ copyFieldsFrom(structName, struct, flags) }}
 {% endmacro %}
 
 {% macro toJson(structName, struct) %}
@@ -26,28 +26,37 @@
     }
 {% endmacro %}
 
-{% macro fromJson(structName, struct) %}
+{% macro fromJson(structName, struct, flags) %}
     void {{ structName }}::fromJson(const json &j) {
         {% for field in struct %}
             if (j.contains("{{ field.name }}"))
                 {{ field.name }} = j.at("{{ field.name }}") {% if field.typ != "json" %} .get<{{ field.typ }}>() {% endif %};
         {% endfor %}
+        {% if flags.dirtyable %}
+            bedirtAll();
+        {% endif %}
     }
 {% endmacro %}
 
-{% macro fromJsonArray(structName, struct) %}
+{% macro fromJsonArray(structName, struct, flags) %}
     void {{ structName }}::fromJsonArray(const json &j) {
         {% for field in struct %}
             {{ field.name }} = j.at({{ loop.index0 }}) {% if field.typ != "json" %} .get<{{ field.typ }}>() {% endif %};
         {% endfor %}
+        {% if flags.dirtyable %}
+            bedirtAll();
+        {% endif %}
     }
 {% endmacro %}
 
-{% macro copyFieldsFrom(structName, struct) %}
+{% macro copyFieldsFrom(structName, struct, flags) %}
     void {{ structName }}::copyFieldsFrom(const {{ structName }} &other) {
         {% for field in struct %}
             {{ field.name }} = other.{{ field.name }};
         {% endfor %}
+        {% if flags.dirtyable %}
+            bedirtAll();
+        {% endif %}
     }
 {% endmacro %}
 

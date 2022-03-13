@@ -3,6 +3,7 @@
 {% import 'serde-json.jinja' as jserde %}
 {% import 'serde-lua.jinja' as lserde %}
 {% import 'stubs.jinja' as stubs %}
+{% import 'dirtying.jinja' as dirtying %}
 
 {{ hd.pragma_once(config.pragma_once) }}
 
@@ -22,6 +23,7 @@
 
         // Method declarations
         {{ stubs.stubs(structName, struct) }}
+        {{ dirtying.dirty_methods(structName, struct) }}
         {{ prop.methods(struct.methods) }}
 
         // Struct info (for in-game inspector)
