@@ -101,7 +101,7 @@
             );
 
             {% for field in struct.expose %}
-                dirtyUserType["{{ field.name }}"] = sol::property([] ({{ structName }}_dirty &dirty) {
+                dirtyUserType["{{ field.name }}"] = sol::property([] ({{ structName }}_dirty &dirty) -> {{ field.typ }} & {
                     dirty.ptr->bedirt<&{{ structName }}::{{ field.name }}>();
                     return dirty.ptr->{{ field.name }};
                 }, [] ({{ structName }}_dirty &dirty, const {{ field.typ }} &x) {
