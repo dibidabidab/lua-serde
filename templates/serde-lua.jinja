@@ -129,7 +129,7 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
 
     utilsTable["getFor"] = [&] (entt::entity entity) -> {{ structName }} * {
 
-        {% if not struct.expose %} // struct.expose is empty
+        {% if not struct.expose and not struct.cpp_only %} // struct is very empty
 
             throw gu_err("{{ structName }} is an empty struct thus cannot be returned.");
         {% else %}
@@ -139,7 +139,7 @@ void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::re
     };
     utilsTable["tryGetFor"] = [&] (entt::entity entity) -> {{ structName }} * {
 
-        {% if not struct.expose %} // struct.expose is empty
+        {% if not struct.expose and not struct.cpp_only %} // struct is very empty
 
             return NULL;
         {% else %}
