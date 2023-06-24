@@ -123,10 +123,8 @@
 
 {% macro registerEntityEngineFunctions(structName, struct) %}
 
-void {{ structName }}::registerEntityEngineFunctions(sol::table &table, entt::registry &reg)
+void {{ structName }}::registerEntityEngineFunctions(sol::table &utilsTable, entt::registry &reg)
 {
-    auto utilsTable = table["{{ structName }}"].get_or_create<sol::table>();
-
     utilsTable["getFor"] = [&] (entt::entity entity) -> {{ structName }} * {
 
         {% if not struct.expose and not struct.cpp_only %} // struct is very empty
