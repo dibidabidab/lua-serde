@@ -40,8 +40,12 @@
 
 {% macro fromJsonArray(structName, struct, flags) %}
     void {{ structName }}::fromJsonArray(const json &j) {
+        const size_t _jsonArraySize = j.size();
         {% for field in struct %}
+        if ({{ loop.index0 }} < _jsonArraySize)
+        {
             {{ field.name }} = j.at({{ loop.index0 }}) {% if field.typ != "json" %} .get<{{ field.typ }}>() {% endif %};
+        }
         {% endfor %}
         {% if flags.dirtyable %}
             bedirtAll();
